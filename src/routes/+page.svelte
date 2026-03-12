@@ -21,6 +21,8 @@
 	interface SolveResponse {
 		x: number;
 		y?: number;
+		dx?: number;
+		dy?: number;
 		iterationCount: number;
 	}
 
@@ -140,16 +142,20 @@
 		}
 
 		try {
-			const res = await fetch(`/api/solve`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(payload)
-			});
+        const res = await fetch(`/api/solve`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
 
-			if (!res.ok) throw new Error(`Ошибка сервера: ${res.status}`);
-			
-			const data = await res.json() as SolveResponse;
-			result = data;
+        const data = await res.json();
+
+        if (!res.ok) {
+            throw new Error(`Ошибка: ${data.error}` || `Ошибка сервера: ${res.status}`);
+        }
+        
+        result = data as SolveResponse;
+
 		} catch (err) {
 			errorMsg = err instanceof Error ? err.message : String(err);
 		} finally {
@@ -233,6 +239,10 @@
 					<p><b>X:</b> {result.x}</p>
 					{#if result.y !== undefined}
 						<p><b>Y:</b> {result.y}</p>
+					{/if}
+					{#if result.dx !== undefined && result.dy !== undefined}
+						<p><b>Dx:</b> {result.dx}</p>
+						<p><b>Dy:</b> {result.dy}</p>
 					{/if}
 					<p><b>Количество итераций:</b> {result.iterationCount}</p>
 				</div>
